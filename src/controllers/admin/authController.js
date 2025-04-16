@@ -199,9 +199,7 @@ const getCurrentAdmin = async (req, res, next) => {
   try {
     res.status(200).json({
       status: 'success',
-      data: {
-        admin: req.admin
-      }
+      data: req.admin
     });
   } catch (error) {
     next(error);

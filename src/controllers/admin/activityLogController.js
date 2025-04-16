@@ -92,9 +92,7 @@ export const getAllActivityLogs = async (req, res) => {
         limit,
         totalPages
       },
-      data: {
-        activityLogs
-      }
+      data: activityLogs
     });
     
     // Log this action
@@ -127,9 +125,7 @@ export const getEntityTypes = async (req, res) => {
     
     res.status(200).json({
       status: 'success',
-      data: {
-        entityTypes: entityTypes.map(item => item.entityType)
-      }
+      data: entityTypes.map(item => item.entityType)
     });
   } catch (error) {
     console.error('Error fetching entity types:', error);
@@ -154,9 +150,7 @@ export const getActions = async (req, res) => {
     
     res.status(200).json({
       status: 'success',
-      data: {
-        actions: actions.map(item => item.action)
-      }
+      data: actions.map(item => item.action)
     });
   } catch (error) {
     console.error('Error fetching actions:', error);
@@ -181,9 +175,7 @@ export const getModules = async (req, res) => {
     
     res.status(200).json({
       status: 'success',
-      data: {
-        modules: modules.map(item => item.module).filter(Boolean)
-      }
+      data: modules.map(item => item.module).filter(Boolean)
     });
   } catch (error) {
     console.error('Error fetching modules:', error);

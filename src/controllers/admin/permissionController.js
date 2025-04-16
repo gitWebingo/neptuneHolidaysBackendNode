@@ -9,9 +9,7 @@ const getAllPermissions = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       results: permissions.length,
-      data: {
-        permissions
-      }
+      data: permissions
     });
     
     // Log this action
@@ -42,9 +40,7 @@ const getPermission = async (req, res, next) => {
     
     res.status(200).json({
       status: 'success',
-      data: {
-        permission
-      }
+      data: permission
     });
     
     // Log this action
@@ -109,9 +105,7 @@ const createPermission = async (req, res, next) => {
     
     res.status(201).json({
       status: 'success',
-      data: {
-        permission: newPermission
-      }
+      data: newPermission
     });
   } catch (error) {
     next(error);
@@ -165,9 +159,7 @@ const updatePermission = async (req, res, next) => {
     
     res.status(200).json({
       status: 'success',
-      data: {
-        permission
-      }
+      data: permission
     });
   } catch (error) {
     next(error);
@@ -246,9 +238,7 @@ const getModules = async (req, res, next) => {
     
     res.status(200).json({
       status: 'success',
-      data: {
-        modules: modules.map(item => item.module)
-      }
+      data: modules.map(item => item.module)
     });
     
     // Log this action

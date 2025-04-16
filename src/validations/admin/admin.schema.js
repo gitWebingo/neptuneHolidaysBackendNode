@@ -26,9 +26,9 @@ export const createAdminSchema = Joi.object({
     'string.min': 'Password must be at least 8 characters long',
     'any.required': 'Password is required'
   }),
-  roleId: Joi.number().integer().required().messages({
-    'number.base': 'Role ID must be a number',
-    'number.integer': 'Role ID must be an integer',
+  roleId: Joi.string().guid({ version: ['uuidv4'] }).required().messages({
+    'string.base': 'Role ID must be a string',
+    'string.guid': 'Role ID must be a valid UUID',
     'any.required': 'Role ID is required'
   }),
   isActive: Joi.boolean().default(true),
@@ -52,9 +52,10 @@ export const updateAdminSchema = Joi.object({
   email: Joi.string().email().messages({
     'string.email': 'Please enter a valid email address'
   }),
-  roleId: Joi.number().integer().messages({
-    'number.base': 'Role ID must be a number',
-    'number.integer': 'Role ID must be an integer'
+  roleId: Joi.string().guid({ version: ['uuidv4'] }).required().messages({
+    'string.base': 'Role ID must be a string',
+    'string.guid': 'Role ID must be a valid UUID',
+    'any.required': 'Role ID is required'
   }),
   isActive: Joi.boolean(),
   phone: Joi.string().pattern(/^\+?[0-9]{10,15}$/).messages({
@@ -88,9 +89,9 @@ export const changePasswordSchema = Joi.object({
  * Schema for admin ID parameter validation
  */
 export const adminIdSchema = Joi.object({
-  id: Joi.number().integer().required().messages({
-    'number.base': 'Admin ID must be a number',
-    'number.integer': 'Admin ID must be an integer',
+  id: Joi.string().guid({ version: ['uuidv4'] }).required().messages({
+    'string.base': 'Admin ID must be a string',
+    'string.guid': 'Admin ID must be a valid UUID',
     'any.required': 'Admin ID is required'
-  })
+  })  
 }); 
