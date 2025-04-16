@@ -68,9 +68,7 @@ const getAllAdmins = async (req, res, next) => {
       totalPages: Math.ceil(count / limit),
       currentPage: page,
       totalItems: count,
-      data: {
-        admins
-      }
+      data: admins
     });
   } catch (error) {
     logger.error('Error fetching admins:', error);
@@ -113,9 +111,7 @@ const getAdminById = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      data: {
-        admin
-      }
+      data: admin
     });
   } catch (error) {
     logger.error('Error fetching admin by ID:', error);

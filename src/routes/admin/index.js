@@ -16,6 +16,6 @@ router.use('/permissions', permissionRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/reports', reportRoutes);
 router.use('/audit', auditRoutes);
-router.use('/users', adminRoutes); // Admin management routes
+router.use('/subAdmin', adminRoutes); // Admin management routes
 
 export default router; 

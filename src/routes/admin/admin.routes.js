@@ -12,6 +12,13 @@ import {
   requirePermission, 
   restrictToSuperAdmin 
 } from '../../middleware/adminAuth.js';
+import { validate, validateParams } from '../../middleware/validator.js';
+import { 
+  createAdminSchema, 
+  updateAdminSchema, 
+  changePasswordSchema, 
+  adminIdSchema 
+} from '../../validations/admin/admin.schema.js';
 
 const router = express.Router();
 
@@ -29,6 +36,7 @@ router.get(
 router.get(
   '/:id', 
   requirePermission('admin:view'), 
+  validateParams(adminIdSchema),
   getAdminById
 );
 
@@ -36,6 +44,7 @@ router.get(
 router.post(
   '/', 
   requirePermission('admin:manage'), 
+  validate(createAdminSchema),
   createAdmin
 );
 
@@ -43,12 +52,16 @@ router.post(
 router.put(
   '/:id', 
   requirePermission('admin:manage'), 
+  validateParams(adminIdSchema),
+  validate(updateAdminSchema),
   updateAdmin
 );
 
 // Update admin password (can be used by admin to change their own password)
 router.patch(
   '/:id/password', 
+  validateParams(adminIdSchema),
+  validate(changePasswordSchema),
   updateAdminPassword
 );
 
@@ -56,6 +69,7 @@ router.patch(
 router.delete(
   '/:id', 
   requirePermission('admin:delete'), 
+  validateParams(adminIdSchema),
   deleteAdmin
 );
 
