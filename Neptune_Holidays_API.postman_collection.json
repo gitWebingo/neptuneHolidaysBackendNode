@@ -1,0 +1,948 @@
+{
+	"info": {
+		"_postman_id": "7f85698b-c548-48c0-9e4b-b35a24b3c5d8",
+		"name": "Neptune Holidays API",
+		"description": "Complete API collection for Neptune Holidays backend system with appropriate permission structures.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"securePassword123\",\n    \"phone\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user"
+					}
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"userToken\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john@example.com\",\n    \"password\": \"securePassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login a user and get JWT token"
+					}
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"if (jsonData.token) {",
+									"    pm.environment.set(\"adminToken\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@neptuneholidays.com\",\n    \"password\": \"adminSecurePassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/admin/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"admin",
+								"login"
+							]
+						},
+						"description": "Login as admin and get admin JWT token"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout current user and invalidate the token"
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get the currently logged in user's information"
+					}
+				}
+			],
+			"description": "Authentication endpoints for users and admins"
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get all users with pagination (Requires 'viewUsers' permission)"
+					}
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:userId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Get a specific user by ID (Requires 'viewUsers' permission)"
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\",\n    \"phone\": \"+9876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:userId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Update a user's information (Requires 'manageUsers' permission)"
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:userId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Delete a user (Requires 'deleteUsers' permission - separated from 'manageUsers' for security)"
+					}
+				}
+			],
+			"description": "Endpoints for managing users - each with appropriate permissions"
+		},
+		{
+			"name": "Admin Management",
+			"item": [
+				{
+					"name": "Register Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Admin User\",\n    \"email\": \"newadmin@neptuneholidays.com\",\n    \"password\": \"secureAdminPass123\",\n    \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"register"
+							]
+						},
+						"description": "Register a new admin user (Requires 'superAdmin' role or 'registerAdmins' permission - regular admins do not have this ability by default for security reasons)"
+					}
+				},
+				{
+					"name": "Get All Admins",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get all admin users with pagination (Requires 'viewAdmins' permission)"
+					}
+				},
+				{
+					"name": "Get Admin by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/:adminId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								":adminId"
+							],
+							"variable": [
+								{
+									"key": "adminId",
+									"value": "admin_id_here"
+								}
+							]
+						},
+						"description": "Get a specific admin by ID (Requires 'viewAdmins' permission)"
+					}
+				},
+				{
+					"name": "Update Admin",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Admin\",\n    \"email\": \"updatedadmin@neptuneholidays.com\",\n    \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/:adminId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								":adminId"
+							],
+							"variable": [
+								{
+									"key": "adminId",
+									"value": "admin_id_here"
+								}
+							]
+						},
+						"description": "Update an admin's information (Requires 'manageAdmins' permission)"
+					}
+				},
+				{
+					"name": "Delete Admin",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/:adminId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								":adminId"
+							],
+							"variable": [
+								{
+									"key": "adminId",
+									"value": "admin_id_here"
+								}
+							]
+						},
+						"description": "Delete an admin (Requires 'deleteAdmins' permission - separated from 'manageAdmins' for security)"
+					}
+				}
+			],
+			"description": "Endpoints for managing admin users - with strict permission controls"
+		},
+		{
+			"name": "Role Management",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"description": "Get all available roles (Requires 'viewRoles' permission)"
+					}
+				},
+				{
+					"name": "Create Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"marketing\",\n    \"displayName\": \"Marketing Manager\",\n    \"description\": \"Marketing team manager with limited access\",\n    \"permissions\": [\"viewUsers\", \"manageContent\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/roles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles"
+							]
+						},
+						"description": "Create a new role (Requires 'manageRoles' permission)"
+					}
+				},
+				{
+					"name": "Update Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"displayName\": \"Marketing Team Lead\",\n    \"description\": \"Updated description for marketing role\",\n    \"permissions\": [\"viewUsers\", \"manageContent\", \"viewReports\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/roles/:roleId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles",
+								":roleId"
+							],
+							"variable": [
+								{
+									"key": "roleId",
+									"value": "role_id_here"
+								}
+							]
+						},
+						"description": "Update an existing role (Requires 'manageRoles' permission)"
+					}
+				},
+				{
+					"name": "Delete Role",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles/:roleId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles",
+								":roleId"
+							],
+							"variable": [
+								{
+									"key": "roleId",
+									"value": "role_id_here"
+								}
+							]
+						},
+						"description": "Delete a role (Requires 'deleteRoles' permission - separated from 'manageRoles' for security)"
+					}
+				}
+			],
+			"description": "Endpoints for managing roles within the system"
+		},
+		{
+			"name": "Permission Management",
+			"item": [
+				{
+					"name": "Get All Permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/permissions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"permissions"
+							]
+						},
+						"description": "Get all system permissions (Requires 'viewPermissions' permission)"
+					}
+				},
+				{
+					"name": "Get Role Permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/roles/:roleId/permissions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles",
+								":roleId",
+								"permissions"
+							],
+							"variable": [
+								{
+									"key": "roleId",
+									"value": "role_id_here"
+								}
+							]
+						},
+						"description": "Get permissions for a specific role (Requires 'viewRoles' permission)"
+					}
+				},
+				{
+					"name": "Update Role Permissions",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"permissions\": [\"viewUsers\", \"manageContent\", \"viewReports\", \"manageSettings\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/roles/:roleId/permissions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"roles",
+								":roleId",
+								"permissions"
+							],
+							"variable": [
+								{
+									"key": "roleId",
+									"value": "role_id_here"
+								}
+							]
+						},
+						"description": "Update permissions for a role (Requires 'manageRoles' permission)"
+					}
+				}
+			],
+			"description": "Endpoints for managing permissions within the system"
+		},
+		{
+			"name": "Session Management",
+			"item": [
+				{
+					"name": "Get User Sessions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/sessions/:userId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Get all active sessions for a user (Requires 'viewSessions' permission)"
+					}
+				},
+				{
+					"name": "Revoke User Session",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sessionId\": \"session_id_here\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sessions/:userId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								":userId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Revoke a specific session for a user (Requires 'manageSessions' permission)"
+					}
+				},
+				{
+					"name": "Revoke All User Sessions",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/sessions/:userId/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								":userId",
+								"all"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "user_id_here"
+								}
+							]
+						},
+						"description": "Revoke all sessions for a user (Requires 'manageSessions' permission)"
+					}
+				}
+			],
+			"description": "Endpoints for managing user sessions"
+		},
+		{
+			"name": "Utilities",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						},
+						"description": "Check the health status of the API"
+					}
+				},
+				{
+					"name": "Redis Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/health/redis",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"health",
+								"redis"
+							]
+						},
+						"description": "Check the health of Redis connection (Requires 'viewSystemHealth' permission)"
+					}
+				},
+				{
+					"name": "Generate JWT Secret",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/utils/generate-jwt-secret",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"utils",
+								"generate-jwt-secret"
+							]
+						},
+						"description": "Manually trigger JWT secret generation if empty (Requires 'superAdmin' role or 'manageSystemSettings' permission)"
+					}
+				}
+			],
+			"description": "Utility endpoints for system maintenance and health checks"
+		},
+		{
+			"name": "Documentation",
+			"item": [
+				{
+					"name": "API Documentation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api-docs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api-docs"
+							]
+						},
+						"description": "Access the Swagger/OpenAPI documentation"
+					}
+				}
+			],
+			"description": "Documentation endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "userToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

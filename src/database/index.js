@@ -33,14 +33,33 @@ const createDefaultData = async () => {
   try {
     // Create default permissions
     const defaultPermissions = [
-      { name: 'Manage Users', code: 'user:manage', module: 'Users', description: 'Create, update, delete users' },
+      // User management permissions
       { name: 'View Users', code: 'user:view', module: 'Users', description: 'View users list and details' },
-      { name: 'Manage Roles', code: 'role:manage', module: 'Roles', description: 'Create, update, delete roles' },
+      { name: 'Manage Users', code: 'user:manage', module: 'Users', description: 'Create and update users' },
+      { name: 'Delete Users', code: 'user:delete', module: 'Users', description: 'Delete users (high-risk operation)' },
+      
+      // Admin management permissions
+      { name: 'View Admins', code: 'admin:view', module: 'Admins', description: 'View admins list and details' },
+      { name: 'Manage Admins', code: 'admin:manage', module: 'Admins', description: 'Create and update admins' },
+      { name: 'Delete Admins', code: 'admin:delete', module: 'Admins', description: 'Delete admins (high-risk operation)' },
+      
+      // Role management permissions
       { name: 'View Roles', code: 'role:view', module: 'Roles', description: 'View roles list and details' },
+      { name: 'Manage Roles', code: 'role:manage', module: 'Roles', description: 'Create and update roles' },
+      { name: 'Delete Roles', code: 'role:delete', module: 'Roles', description: 'Delete roles (high-risk operation)' },
+      
+      // Permission management
+      { name: 'View Permissions', code: 'permission:view', module: 'Permissions', description: 'View system permissions' },
       { name: 'Assign Permissions', code: 'permission:assign', module: 'Permissions', description: 'Assign permissions to roles' },
+      
+      // Settings permissions
       { name: 'View Settings', code: 'settings:view', module: 'Settings', description: 'View system settings' },
       { name: 'Manage Settings', code: 'settings:manage', module: 'Settings', description: 'Update system settings' },
+      
+      // Report permissions
       { name: 'View Reports', code: 'reports:view', module: 'Reports', description: 'View system reports' },
+      
+      // Audit permissions
       { name: 'View Audit Logs', code: 'audit:view', module: 'Audit', description: 'View system audit logs' }
     ];
 
@@ -77,10 +96,10 @@ const createDefaultData = async () => {
     // Assign all permissions to superadmin role
     await superadminRole.setPermissions(allPermissions);
     
-    // Assign some permissions to admin role (excluding role and permission management)
+    // Assign some permissions to admin role (appropriate set for standard admins)
     const adminPermissions = await Permission.findAll({
       where: {
-        code: ['user:view', 'reports:view', 'settings:view']
+        code: ['user:view', 'user:manage', 'admin:view', 'settings:view', 'reports:view', 'audit:view']
       }
     });
     await adminRole.setPermissions(adminPermissions);

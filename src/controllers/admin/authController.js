@@ -208,63 +208,6 @@ const getCurrentAdmin = async (req, res, next) => {
   }
 };
 
-// Admin registration (typically would be restricted to superadmin)
-const register = async (req, res, next) => {
-  try {
-    const { firstName, lastName, email, password, roleId } = req.body;
-    
-    // Check if admin with this email already exists
-    const existingAdmin = await Admin.findOne({ where: { email } });
-    if (existingAdmin) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Email is already in use'
-      });
-    }
-    
-    // Create new admin
-    const newAdmin = await Admin.create({
-      firstName,
-      lastName,
-      email,
-      password,
-      roleId,
-      createdById: req.admin.id, // Track who created this admin
-      lastModifiedById: req.admin.id
-    });
-    
-    // Remove password from output
-    newAdmin.password = undefined;
-    
-    // Log the admin creation
-    await ActivityLog.create({
-      adminId: req.admin.id,
-      action: 'create',
-      entityType: 'Admin',
-      entityId: newAdmin.id,
-      description: `Admin created a new admin account for ${firstName} ${lastName}`,
-      newValues: {
-        firstName,
-        lastName,
-        email,
-        roleId
-      },
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
-      module: 'Admin'
-    });
-    
-    res.status(201).json({
-      status: 'success',
-      data: {
-        admin: newAdmin
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // Verify token
 const verifyToken = (token, tokenId) => {
   try {
@@ -290,7 +233,6 @@ export {
   login,
   logout,
   getCurrentAdmin,
-  register,
   verifyToken,
   getAdminSessionById
 }; 
