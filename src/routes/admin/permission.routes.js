@@ -6,7 +6,7 @@ import {
   updatePermission,
   deletePermission,
   getModules
-} from '../../controllers/permissionController.js';
+} from '../../controllers/admin/permissionController.js';
 import { authenticateAdmin, requirePermission, restrictToSuperAdmin } from '../../middleware/adminAuth.js';
 
 const router = express.Router();

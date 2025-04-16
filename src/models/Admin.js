@@ -29,6 +29,11 @@ const Admin = sequelize.define('Admin', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  profilePicture: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'URL or path to the admin profile picture'
+  },
   roleId: {
     type: DataTypes.UUID,
     allowNull: false
@@ -44,6 +49,16 @@ const Admin = sequelize.define('Admin', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  createdById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who created this admin'
+  },
+  lastModifiedById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who last modified this admin'
   }
 }, {
   timestamps: true,

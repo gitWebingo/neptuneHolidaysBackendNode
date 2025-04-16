@@ -19,6 +19,16 @@ const Role = sequelize.define('Role', {
   isSystemRole: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  createdById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who created this role'
+  },
+  lastModifiedById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who last modified this role'
   }
 }, {
   timestamps: true,

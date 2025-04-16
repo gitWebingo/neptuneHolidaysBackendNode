@@ -1,22 +1,16 @@
 import express from 'express';
-import { login, logout, getCurrentAdmin, register } from '../../controllers/adminController.js';
-import { authenticateAdmin, requirePermission } from '../../middleware/adminAuth.js';
+import { login, logout, getCurrentAdmin } from '../../controllers/admin/authController.js';
+import { authenticateAdmin } from '../../middleware/adminAuth.js';
+import { validate } from '../../middleware/validator.js';
+import { loginSchema } from '../../validations/admin/auth.schema.js';
 
 const router = express.Router();
 
 // Public routes
-router.post('/login', login);
-router.get('/logout', logout);
+router.post('/login', validate(loginSchema), login);
 
 // Protected routes
 router.get('/me', authenticateAdmin, getCurrentAdmin);
-
-// Admin registration (protected)
-router.post(
-  '/register', 
-  authenticateAdmin, 
-  requirePermission('user:manage'), 
-  register
-);
+router.post('/logout', authenticateAdmin, logout);
 
 export default router; 

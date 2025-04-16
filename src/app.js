@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import serverConfig from './config/server.js';
 import errorHandler from './middleware/errorHandler.js';
+import { activityLoggerMiddleware } from './utils/activityLogger.js';
 
 // Import routes
 import routes from './routes/index.js';
@@ -38,6 +39,9 @@ if (nodeEnv === 'development') {
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
+
+// Activity logger middleware
+app.use(activityLoggerMiddleware());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
