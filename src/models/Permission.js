@@ -26,6 +26,16 @@ const Permission = sequelize.define('Permission', {
     type: DataTypes.STRING,
     allowNull: false,
     comment: 'Module or section this permission belongs to'
+  },
+  createdById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who created this permission'
+  },
+  lastModifiedById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who last modified this permission'
   }
 }, {
   timestamps: true,

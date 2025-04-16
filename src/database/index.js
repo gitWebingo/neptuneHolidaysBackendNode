@@ -4,6 +4,7 @@ import Admin from '../models/Admin.js';
 import Role from '../models/Role.js';
 import Permission from '../models/Permission.js';
 import RolePermission from '../models/RolePermission.js';
+import ActivityLog from '../models/ActivityLog.js';
 
 // Import all models here
 const models = {
@@ -11,12 +12,20 @@ const models = {
   Admin,
   Role,
   Permission,
-  RolePermission
+  RolePermission,
+  ActivityLog
 };
 
 // Define relationships between models if needed
 const setupAssociations = () => {
   // Associations are already set up in the model files
+  
+  // Set up activity log associations
+  ActivityLog.belongsTo(User, { foreignKey: 'userId', as: 'User' });
+  User.hasMany(ActivityLog, { foreignKey: 'userId', as: 'ActivityLogs' });
+  
+  ActivityLog.belongsTo(Admin, { foreignKey: 'adminId', as: 'Admin' });
+  Admin.hasMany(ActivityLog, { foreignKey: 'adminId', as: 'ActivityLogs' });
 };
 
 // Create default permissions and roles if they don't exist
@@ -31,7 +40,8 @@ const createDefaultData = async () => {
       { name: 'Assign Permissions', code: 'permission:assign', module: 'Permissions', description: 'Assign permissions to roles' },
       { name: 'View Settings', code: 'settings:view', module: 'Settings', description: 'View system settings' },
       { name: 'Manage Settings', code: 'settings:manage', module: 'Settings', description: 'Update system settings' },
-      { name: 'View Reports', code: 'reports:view', module: 'Reports', description: 'View system reports' }
+      { name: 'View Reports', code: 'reports:view', module: 'Reports', description: 'View system reports' },
+      { name: 'View Audit Logs', code: 'audit:view', module: 'Audit', description: 'View system audit logs' }
     ];
 
     for (const permissionData of defaultPermissions) {

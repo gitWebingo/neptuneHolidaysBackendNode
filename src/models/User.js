@@ -28,6 +28,11 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  profilePicture: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'URL or path to the user profile picture'
+  },
   role: {
     type: DataTypes.ENUM('user', 'admin'),
     defaultValue: 'user'
@@ -35,6 +40,16 @@ const User = sequelize.define('User', {
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  createdById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who created this user'
+  },
+  lastModifiedById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'ID of the admin who last modified this user'
   }
 }, {
   timestamps: true,
