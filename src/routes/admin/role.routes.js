@@ -5,7 +5,7 @@ import {
   createRole,
   updateRole,
   deleteRole
-} from '../../controllers/roleController.js';
+} from '../../controllers/admin/roleController.js';
 import { authenticateAdmin, requirePermission } from '../../middleware/adminAuth.js';
 
 const router = express.Router();

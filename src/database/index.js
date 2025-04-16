@@ -97,7 +97,7 @@ const createDefaultData = async () => {
       await Admin.create({
         firstName: 'Super',
         lastName: 'Admin',
-        email: 'superadmin@example.com',
+        email: 'spectraxcodes07@gmail.com',
         password: 'P@ssw0rd123', // This will be hashed by the model hooks
         roleId: superadminRole.id,
         isActive: true

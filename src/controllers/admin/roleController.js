@@ -1,6 +1,6 @@
-import Role from '../models/Role.js';
-import Permission from '../models/Permission.js';
-import Admin from '../models/Admin.js';
+import Role from '../../models/Role.js';
+import Permission from '../../models/Permission.js';
+import ActivityLog from '../../models/ActivityLog.js';
 
 // Get all roles
 const getAllRoles = async (req, res, next) => {
@@ -18,6 +18,14 @@ const getAllRoles = async (req, res, next) => {
       data: {
         roles
       }
+    });
+    
+    // Log this action
+    req.logActivity({
+      action: 'read',
+      entityType: 'Role',
+      description: 'Retrieved all roles',
+      module: 'Admin/Roles'
     });
   } catch (error) {
     next(error);
@@ -48,6 +56,15 @@ const getRole = async (req, res, next) => {
       data: {
         role
       }
+    });
+    
+    // Log this action
+    req.logActivity({
+      action: 'read',
+      entityType: 'Role',
+      entityId: id,
+      description: `Retrieved role: ${role.name}`,
+      module: 'Admin/Roles'
     });
   } catch (error) {
     next(error);
@@ -89,7 +106,9 @@ const createRole = async (req, res, next) => {
     const newRole = await Role.create({
       name,
       description,
-      isSystemRole: !!req.body.isSystemRole
+      isSystemRole: !!req.body.isSystemRole,
+      createdById: req.admin.id,
+      lastModifiedById: req.admin.id
     });
     
     // Assign permissions if provided
@@ -111,6 +130,21 @@ const createRole = async (req, res, next) => {
       }
     });
     
+    // Log the role creation
+    req.logActivity({
+      action: 'create',
+      entityType: 'Role',
+      entityId: newRole.id,
+      description: `Created new role: ${name}`,
+      newValues: {
+        name,
+        description,
+        isSystemRole: !!req.body.isSystemRole,
+        permissions: permissions || []
+      },
+      module: 'Admin/Roles'
+    });
+    
     res.status(201).json({
       status: 'success',
       data: {
@@ -129,7 +163,12 @@ const updateRole = async (req, res, next) => {
     const { name, description, permissions } = req.body;
     
     // Find the role
-    const role = await Role.findByPk(id);
+    const role = await Role.findByPk(id, {
+      include: {
+        model: Permission,
+        through: { attributes: [] }
+      }
+    });
     
     if (!role) {
       return res.status(404).json({
@@ -137,6 +176,13 @@ const updateRole = async (req, res, next) => {
         message: 'Role not found'
       });
     }
+    
+    // Store previous values for logging
+    const previousValues = {
+      name: role.name,
+      description: role.description,
+      permissions: role.Permissions ? role.Permissions.map(p => p.id) : []
+    };
     
     // Don't allow modifying system roles unless you're superadmin
     if (role.isSystemRole) {
@@ -171,6 +217,7 @@ const updateRole = async (req, res, next) => {
     // Update role details
     if (name) role.name = name;
     if (description !== undefined) role.description = description;
+    role.lastModifiedById = req.admin.id;
     
     await role.save();
     
@@ -201,6 +248,24 @@ const updateRole = async (req, res, next) => {
       }
     });
     
+    // Create new values object for logging
+    const newValues = {
+      name: updatedRole.name,
+      description: updatedRole.description,
+      permissions: updatedRole.Permissions ? updatedRole.Permissions.map(p => p.id) : []
+    };
+    
+    // Log the role update
+    req.logActivity({
+      action: 'update',
+      entityType: 'Role',
+      entityId: id,
+      description: `Updated role: ${updatedRole.name}`,
+      previousValues,
+      newValues,
+      module: 'Admin/Roles'
+    });
+    
     res.status(200).json({
       status: 'success',
       data: {
@@ -218,7 +283,12 @@ const deleteRole = async (req, res, next) => {
     const { id } = req.params;
     
     // Find the role
-    const role = await Role.findByPk(id);
+    const role = await Role.findByPk(id, {
+      include: {
+        model: Permission,
+        through: { attributes: [] }
+      }
+    });
     
     if (!role) {
       return res.status(404).json({
@@ -235,22 +305,39 @@ const deleteRole = async (req, res, next) => {
       });
     }
     
-    // Check if there are admins using this role
-    const adminsWithRole = await Admin.count({ where: { roleId: id } });
-    
-    if (adminsWithRole > 0) {
+    // Check if any admins are using this role
+    const adminsWithRole = await role.getAdmins();
+    if (adminsWithRole.length > 0) {
       return res.status(400).json({
         status: 'fail',
-        message: `Cannot delete role. It is currently assigned to ${adminsWithRole} admin(s).`
+        message: `Cannot delete role. It is assigned to ${adminsWithRole.length} admin(s)`
       });
     }
+    
+    // Store info for logging
+    const roleInfo = {
+      id: role.id,
+      name: role.name,
+      description: role.description,
+      permissions: role.Permissions ? role.Permissions.map(p => p.id) : []
+    };
     
     // Delete the role
     await role.destroy();
     
-    res.status(204).json({
+    // Log the role deletion
+    req.logActivity({
+      action: 'delete',
+      entityType: 'Role',
+      entityId: id,
+      description: `Deleted role: ${roleInfo.name}`,
+      previousValues: roleInfo,
+      module: 'Admin/Roles'
+    });
+    
+    res.status(200).json({
       status: 'success',
-      data: null
+      message: 'Role deleted successfully'
     });
   } catch (error) {
     next(error);

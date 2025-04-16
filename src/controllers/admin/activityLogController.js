@@ -1,5 +1,6 @@
-import ActivityLog from '../models/ActivityLog.js';
+import ActivityLog from '../../models/ActivityLog.js';
 import { Op } from 'sequelize';
+import { sequelize } from '../../config/database.js';
 
 /**
  * Get all activity logs with pagination and filtering

@@ -1,15 +1,15 @@
 import express from 'express';
-import { login, logout, getCurrentAdmin, register } from '../../controllers/adminController.js';
+import { login, logout, getCurrentAdmin, register } from '../../controllers/admin/authController.js';
 import { authenticateAdmin, requirePermission } from '../../middleware/adminAuth.js';
 
 const router = express.Router();
 
 // Public routes
 router.post('/login', login);
-router.get('/logout', logout);
 
 // Protected routes
 router.get('/me', authenticateAdmin, getCurrentAdmin);
+router.post('/logout', authenticateAdmin, logout);
 
 // Admin registration (protected)
 router.post(

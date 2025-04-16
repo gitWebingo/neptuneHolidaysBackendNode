@@ -2,9 +2,16 @@ import jwt from 'jsonwebtoken';
 import serverConfig from '../config/server.js';
 import Admin from '../models/Admin.js';
 import Role from '../models/Role.js';
+import { getAdminSession } from '../utils/redisClient.js';
+import AppError from '../utils/appError.js';
+import logger from '../utils/logger.js';
 
 const { jwtSecret } = serverConfig;
 
+/**
+ * Authenticate admin middleware
+ * Verifies JWT token and checks for valid session in Redis
+ */
 const authenticateAdmin = async (req, res, next) => {
   try {
     let token;
@@ -20,10 +27,7 @@ const authenticateAdmin = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'You are not logged in. Please log in to get access.'
-      });
+      return next(new AppError('You are not logged in. Please log in to get access.', 401));
     }
 
     // Verify token
@@ -31,10 +35,7 @@ const authenticateAdmin = async (req, res, next) => {
 
     // Check if it's an admin token
     if (!decoded.isAdmin) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'Invalid token. Admin access required.'
-      });
+      return next(new AppError('Invalid token. Admin access required.', 401));
     }
 
     // Check if admin still exists
@@ -46,28 +47,32 @@ const authenticateAdmin = async (req, res, next) => {
     });
     
     if (!currentAdmin) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'The admin belonging to this token no longer exists.'
-      });
+      return next(new AppError('The admin account no longer exists.', 401));
     }
 
     // Check if admin is active
     if (!currentAdmin.isActive) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'This admin account has been deactivated.'
-      });
+      return next(new AppError('This admin account has been deactivated.', 401));
+    }
+    
+    // Check if the admin has an active session in Redis
+    const adminSession = await getAdminSession(decoded.id);
+    
+    if (!adminSession) {
+      return next(new AppError('Your session has expired. Please log in again.', 401));
+    }
+    
+    // Verify the token ID matches the active session
+    if (decoded.tokenId !== adminSession.tokenId) {
+      return next(new AppError('Invalid session. Please log in again.', 401));
     }
 
     // Grant access to protected route
     req.admin = currentAdmin;
     next();
   } catch (error) {
-    return res.status(401).json({
-      status: 'fail',
-      message: 'Invalid token or authorization failed.'
-    });
+    logger.error('Admin authentication error:', error);
+    return next(new AppError('Invalid token or authorization failed.', 401));
   }
 };
 
@@ -77,18 +82,13 @@ const restrictToSuperAdmin = async (req, res, next) => {
     const isSuperAdmin = await req.admin.isSuperAdmin();
     
     if (!isSuperAdmin) {
-      return res.status(403).json({
-        status: 'fail',
-        message: 'This action is restricted to super administrators only.'
-      });
+      return next(new AppError('This action is restricted to super administrators only.', 403));
     }
     
     next();
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'Error checking admin permissions.'
-    });
+    logger.error('Error checking admin permissions:', error);
+    return next(new AppError('Error checking admin permissions.', 500));
   }
 };
 
@@ -107,18 +107,13 @@ const requirePermission = (...permissionCodes) => {
       const hasPermission = await req.admin.hasAnyPermission(permissionCodes);
       
       if (!hasPermission) {
-        return res.status(403).json({
-          status: 'fail',
-          message: 'You do not have permission to perform this action.'
-        });
+        return next(new AppError('You do not have permission to perform this action.', 403));
       }
       
       next();
     } catch (error) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Error checking admin permissions.'
-      });
+      logger.error('Error checking admin permissions:', error);
+      return next(new AppError('Error checking admin permissions.', 500));
     }
   };
 };
@@ -138,18 +133,13 @@ const requireAllPermissions = (...permissionCodes) => {
       const hasAllPermissions = await req.admin.hasAllPermissions(permissionCodes);
       
       if (!hasAllPermissions) {
-        return res.status(403).json({
-          status: 'fail',
-          message: 'You do not have all the required permissions to perform this action.'
-        });
+        return next(new AppError('You do not have all the required permissions to perform this action.', 403));
       }
       
       next();
     } catch (error) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Error checking admin permissions.'
-      });
+      logger.error('Error checking admin permissions:', error);
+      return next(new AppError('Error checking admin permissions.', 500));
     }
   };
 };
@@ -167,18 +157,13 @@ const restrictToAdmin = (...roleNames) => {
       
       // Check if admin's role name is in the provided list
       if (!req.admin.Role || !roleNames.includes(req.admin.Role.name)) {
-        return res.status(403).json({
-          status: 'fail',
-          message: 'You do not have permission to perform this action.'
-        });
+        return next(new AppError('You do not have permission to perform this action.', 403));
       }
       
       next();
     } catch (error) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Error checking admin role.'
-      });
+      logger.error('Error checking admin role:', error);
+      return next(new AppError('Error checking admin role.', 500));
     }
   };
 };

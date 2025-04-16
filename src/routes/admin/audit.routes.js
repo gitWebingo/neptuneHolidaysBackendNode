@@ -4,7 +4,7 @@ import {
   getEntityTypes, 
   getActions, 
   getModules 
-} from '../../controllers/activityLogController.js';
+} from '../../controllers/admin/activityLogController.js';
 import { authenticateAdmin, requirePermission } from '../../middleware/adminAuth.js';
 
 const router = express.Router();

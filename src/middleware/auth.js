@@ -1,10 +1,18 @@
 import jwt from 'jsonwebtoken';
-import serverConfig from '../config/server.js';
+import AppError from '../utils/appError.js';
 import User from '../models/User.js';
+import Admin from '../models/Admin.js';
+import serverConfig from '../config/server.js';
+import { getUserSession } from '../utils/redisClient.js';
+import logger from '../utils/logger.js';
 
 const { jwtSecret } = serverConfig;
 
-const authenticate = async (req, res, next) => {
+/**
+ * Authenticate user middleware
+ * Verifies JWT token and checks for valid session in Redis
+ */
+export const authenticate = async (req, res, next) => {
   try {
     let token;
     
@@ -19,10 +27,7 @@ const authenticate = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'You are not logged in. Please log in to get access.'
-      });
+      return next(new AppError('You are not logged in. Please log in to get access.', 401));
     }
 
     // Verify token
@@ -31,36 +36,39 @@ const authenticate = async (req, res, next) => {
     // Check if user still exists
     const currentUser = await User.findByPk(decoded.id);
     if (!currentUser) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'The user belonging to this token no longer exists.'
-      });
+      return next(new AppError('The user belonging to this token no longer exists.', 401));
+    }
+    
+    // Check if the user has an active session in Redis
+    const userSession = await getUserSession(decoded.id);
+    
+    if (!userSession) {
+      return next(new AppError('Your session has expired. Please log in again.', 401));
+    }
+    
+    // Verify the token ID matches the active session
+    if (decoded.tokenId !== userSession.tokenId) {
+      return next(new AppError('Invalid session. Please log in again.', 401));
     }
 
     // Grant access to protected route
     req.user = currentUser;
     next();
   } catch (error) {
-    return res.status(401).json({
-      status: 'fail',
-      message: 'Invalid token or authorization failed.'
-    });
+    logger.error('Authentication error:', error);
+    return next(new AppError('Invalid token or authorization failed.', 401));
   }
 };
 
-const restrictTo = (...roles) => {
+/**
+ * Restrict to specific user roles
+ * @param {...string} roles - Allowed roles
+ */
+export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        status: 'fail',
-        message: 'You do not have permission to perform this action.'
-      });
+      return next(new AppError('You do not have permission to perform this action.', 403));
     }
     next();
   };
-};
-
-export {
-  authenticate,
-  restrictTo
 }; 
